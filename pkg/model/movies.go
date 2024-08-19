@@ -6,7 +6,6 @@ type Movie struct {
 	ID       int    `json:"id"`
 	Title    string `json:"title"`
 	Overview string `json:"overview"`
-	Counter  int    `json:"counter"`
 }
 type MovieCounter struct {
 	ID      int `json:"id"`
