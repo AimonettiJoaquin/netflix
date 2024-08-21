@@ -55,6 +55,7 @@ func getMovieById(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		var movies models.Movie
+
 		err = json.Unmarshal(body, &movies)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

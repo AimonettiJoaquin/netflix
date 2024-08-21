@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+
 	"net/http"
 	"netflix/pkg/model"
 	"strconv"
@@ -75,16 +76,25 @@ func deleteComment(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_, err = model.GetCommentByID(db, id)
+		idUser, err := strconv.Atoi(r.Header.Get("id_user"))
+		if err != nil {
+			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+		}
+
+		comment, err := model.GetCommentByID(db, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				http.Error(w, "Comment not found", http.StatusNotFound)
 				return
 			}
+		} else if comment.Id_User != idUser {
+			http.Error(w, "You are not authorized to delete this comment", http.StatusUnauthorized)
+			return
 		}
 
 		err = model.DeleteComment(db, id)
@@ -119,12 +129,21 @@ func updateComment(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err = model.GetCommentByID(db, id)
+		c, err := model.GetCommentByID(db, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				http.Error(w, "Comment not found", http.StatusNotFound)
 				return
 			}
+		}
+		idUser, err := strconv.Atoi(r.Header.Get("id_user"))
+		if err != nil {
+			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+		}
+
+		if c.Id_User != idUser {
+			http.Error(w, "You are not authorized to change this comment", http.StatusUnauthorized)
+			return
 		}
 
 		var comment model.Comment
@@ -140,6 +159,6 @@ func updateComment(db *sql.DB) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(comment)
+		json.NewEncoder(w).Encode("Comentario editado correctamente.")
 	}
 }

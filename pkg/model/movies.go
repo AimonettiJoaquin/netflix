@@ -11,6 +11,10 @@ type MovieCounter struct {
 	ID      int `json:"id"`
 	Counter int `json:"counter"`
 }
+type MovieComment struct {
+	Movie
+	Comment string `json:"comment"`
+}
 
 type Movies struct {
 	Results []Movie
