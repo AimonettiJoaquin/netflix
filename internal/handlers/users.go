@@ -48,6 +48,7 @@ func getUsers(db *sql.DB) http.HandlerFunc {
 		users, err := model.GetUsers(db)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")

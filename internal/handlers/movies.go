@@ -36,10 +36,10 @@ func getMovieById(db *sql.DB) http.HandlerFunc {
 		}
 		idUser, err := strconv.Atoi(r.Header.Get("id_user"))
 		if err != nil {
-			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+			http.Error(w, "Please login", http.StatusInternalServerError)
 			return
 		} else if idUser == 0 {
-			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+			http.Error(w, "Please login", http.StatusInternalServerError)
 			return
 		}
 
@@ -72,7 +72,8 @@ func getMovieById(db *sql.DB) http.HandlerFunc {
 		}
 		comment, err := model.GetCommentByMovieUser(db, id, idUser)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "This user have no comment in this movie", http.StatusBadRequest)
+			return
 		}
 		var movieComment models.MovieComment
 		movieComment.Movie = movie
@@ -100,7 +101,13 @@ func getListMoviePopular() http.HandlerFunc {
 		cant, err := strconv.Atoi(vars["cant"])
 
 		if err != nil {
-			http.Error(w, "Invalid cantidad", http.StatusBadRequest)
+			http.Error(w, "Invalid quantity", http.StatusBadRequest)
+			return
+		} else if cant > 35 {
+			http.Error(w, "35 results max", http.StatusBadRequest)
+			return
+		} else if cant < 1 {
+			http.Error(w, "Invalid quantity", http.StatusBadRequest)
 			return
 		}
 

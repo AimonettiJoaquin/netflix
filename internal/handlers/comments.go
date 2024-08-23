@@ -83,7 +83,7 @@ func deleteComment(db *sql.DB) http.HandlerFunc {
 		}
 		idUser, err := strconv.Atoi(r.Header.Get("id_user"))
 		if err != nil {
-			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+			http.Error(w, "Invalid user", http.StatusInternalServerError)
 		}
 
 		comment, err := model.GetCommentByID(db, id)
