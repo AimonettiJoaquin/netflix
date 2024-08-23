@@ -34,6 +34,14 @@ func getMovieById(db *sql.DB) http.HandlerFunc {
 			http.Error(w, "Invalid movie ID", http.StatusBadRequest)
 			return
 		}
+		idUser, err := strconv.Atoi(r.Header.Get("id_user"))
+		if err != nil {
+			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+			return
+		} else if idUser == 0 {
+			http.Error(w, "Usuario incorrecto", http.StatusInternalServerError)
+			return
+		}
 
 		url := "https://api.themoviedb.org/3/movie/" + strconv.Itoa(id) + "?language=en-US"
 		req, _ := http.NewRequest("GET", url, nil)
@@ -54,21 +62,31 @@ func getMovieById(db *sql.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		var movies models.Movie
 
-		err = json.Unmarshal(body, &movies)
+		var movie models.Movie
+
+		err = json.Unmarshal(body, &movie)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		comment, err := model.GetCommentByMovieUser(db, id, idUser)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		var movieComment models.MovieComment
+		movieComment.Movie = movie
+		movieComment.Comment = comment.Comment
+
 		_, err = model.GetMovieByID(db, id)
 		if err != nil {
 			model.CreateMovie(db, id)
 		} else {
 			model.UpdateMovie(db, id)
 		}
+
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(movies)
+		json.NewEncoder(w).Encode(movieComment)
 	}
 }
 

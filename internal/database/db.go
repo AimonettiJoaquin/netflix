@@ -41,7 +41,7 @@ func CreateCommentsTable(db *sql.DB) error {
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			id_user INT NOT NULL,
 			id_movie INT NOT NULL,
-			description VARCHAR(255) NOT NULL
+			comment VARCHAR(255) NOT NULL
 		)
 	`)
 	if err != nil {
